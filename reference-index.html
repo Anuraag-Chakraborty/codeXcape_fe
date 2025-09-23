@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scotland Yard</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- MAIN MENU SECTION -->
+  <div id="mainMenu" class="fade-section active">
+    <h1 class="title">SCOTLAND YARD</h1>
+     
+    <div class="buttons">
+      <button class="btn" id="startBtn">START</button>
+      <button class="btn" id="howToPlayBtn">HOW TO PLAY</button>
+    </div>
+     
+    <div class="team-box">
+      <h2 contenteditable="true" spellcheck="false" data-default="TEAM NAME">TEAM NAME</h2>
+      <p contenteditable="true" spellcheck="false" data-default="PLAYER 1 NAME">PLAYER 1 NAME</p>
+      <p contenteditable="true" spellcheck="false" data-default="PLAYER 2 NAME">PLAYER 2 NAME</p>
+      <p contenteditable="true" spellcheck="false" data-default="PLAYER 3 NAME">PLAYER 3 NAME</p>
+      <p contenteditable="true" spellcheck="false" data-default="PLAYER 4 NAME">PLAYER 4 NAME</p>
+    </div>
+    <!-- Let's Begin Button -->
+      <button class="btn lets-begin-btn" id="letsBeginBtn" disabled>LET'S BEGIN</button>
+  </div>
+   
+  <!-- HOW TO PLAY SECTION -->
+  <div id="howToPlay" class="fade-section">
+    <div class="instructions-box">
+      <h1>INSTRUCTIONS</h1>
+      <ol>
+        <li>Each player will receive a role at the beginning of the game.</li>
+        <li>One player will be Mr. X, the others will be detectives.</li>
+        <li>Mr. X moves in secret while detectives try to track him down.</li>
+        <li>Players use transport tickets to move across the map.</li>
+        <li>Coordinate with your teammates to catch Mr. X within the time limit.</li>
+        <li>These are filler rules for the time being.</li>
+      </ol>
+       
+      <button class="btn back-btn" id="backBtn">BACK</button>
+    </div>
+  </div>
+   
+  <!-- REGISTRATION SECTION (modal) -->
+  <div id="registration" class="fade-section">
+    <div class="registration-box">
+      <h1>EVENT REGISTRATION</h1>
+       
+      <div class="members-header">
+        <label for="numMembers">NUMBER OF MEMBERS</label>
+        <select id="numMembers">
+          <option value="3">3</option>
+          <option value="4" selected>4</option>
+          <option value="5">5</option>
+        </select>
+      </div>
+       
+      <!-- dynamic inputs injected here -->
+      <div id="membersContainer"></div>
+       
+      <div style="display:flex; gap:12px; justify-content:center; margin-top:12px;">
+        <button class="btn" id="submitRegistration">SUBMIT</button>
+        <button class="btn back-btn" id="backToMenuBtn">BACK</button>
+      </div>
+       
+      <p id="statusMsg" style="margin-top:12px; text-align:center; color:#ff6b6b;">INFO NOT SUBMITTED</p>
+    </div>
+  </div>
+
+  <!-- LEVEL SELECTION PAGE -->
+  <div id="levelPage" class="fade-section">
+    <div class="level-container">
+      <!-- Team Info Menu -->
+      <div class="team-info-menu" id="teamInfoMenu">
+        <h3 id="displayTeamName">TEAM NAME</h3>
+        <div id="displayMembers"></div>
+      </div>
+
+      <!-- Level Boxes -->
+      <div class="level-boxes">
+        <div class="level-box" id="level1" onclick="selectLevel(1)">
+          <span>LEVEL 1</span>
+        </div>
+        <div class="level-box" id="level2" onclick="selectLevel(2)">
+          <span>LEVEL 2</span>
+        </div>
+        <div class="level-box" id="level3" onclick="selectLevel(3)">
+          <span>LEVEL 3</span>
+        </div>
+      </div>
+    </div>
+  </div>
+   
+  <script src="script.js"></script>
+</body>
+</html>

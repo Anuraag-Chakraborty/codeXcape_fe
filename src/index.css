@@ -1,0 +1,138 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 0 0% 0%;
+  --foreground: 180 100% 94%;
+  --primary: 180 100% 50%;
+  --primary-foreground: 0 0% 0%;
+  --primary-glow: 180 100% 70%;
+  --secondary: 51 100% 50%;
+  --secondary-foreground: 0 0% 0%;
+  --secondary-glow: 51 100% 70%;
+  --background-deep: 240 100% 5%;
+  --background-nebula: 270 50% 10%;
+  --card: 0 0% 5%;
+  --card-foreground: 180 100% 94%;
+  --card-glow: 180 50% 50%;
+  --accent: 280 100% 60%;
+  --accent-foreground: 0 0% 0%;
+  --muted: 240 5% 15%;
+  --muted-foreground: 240 5% 65%;
+  --border: 180 50% 30%;
+  --input: 240 10% 15%;
+  --ring: 180 100% 50%;
+  --glow-cyan: 180 100% 50%;
+  --glow-gold: 51 100% 50%;
+  --glow-purple: 280 100% 60%;
+  --shadow-cosmic: 0 0 20px rgba(0, 255, 238, 0.3);
+  --shadow-portal: 0 0 30px rgba(139, 69, 19, 0.5);
+  --shadow-gold: 0 0 25px rgba(255, 215, 0, 0.4);
+  --radius: 0.75rem;
+}
+
+* {
+  border-color: hsl(var(--border));
+}
+
+body {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: 'Press Start 2P', monospace;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(2px 2px at 20px 30px, #eee, transparent);
+  background-repeat: repeat;
+  background-size: 200px 100px;
+  z-index: -1;
+  animation: twinkle 20s linear infinite;
+}
+
+.space-button {
+  position: relative;
+  overflow: hidden;
+  background: rgba(0, 0, 0, 0.7);
+  border: 2px solid rgba(0, 255, 238, 0.5);
+  box-shadow: 0 0 20px rgba(0, 255, 238, 0.3);
+  backdrop-filter: blur(8px);
+  transition: all 0.3s ease;
+}
+
+.space-button:hover {
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  transform: translateY(-2px);
+}
+
+.cosmic-portal {
+  position: relative;
+  border-radius: 0.75rem;
+  background: linear-gradient(135deg, hsl(180 100% 50%), hsl(280 100% 60%));
+  border: 3px solid hsl(280 100% 60%);
+  box-shadow: 0 0 30px rgba(139, 69, 19, 0.5);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.cosmic-portal:hover {
+  transform: translateY(-10px) scale(1.05);
+}
+
+.space-card {
+  background: rgba(0, 0, 0, 0.8);
+  border: 2px solid hsl(var(--border));
+  box-shadow: 0 0 20px rgba(0, 255, 238, 0.3);
+  backdrop-filter: blur(10px);
+}
+
+.glow-text {
+  text-shadow: 0 0 10px currentColor, 0 0 20px currentColor;
+}
+
+.team-info-panel {
+  background: rgba(0, 0, 0, 0.8);
+  border: 2px solid rgba(0, 255, 238, 0.6);
+  box-shadow: 0 0 20px rgba(0, 255, 238, 0.3);
+  backdrop-filter: blur(10px);
+}
+
+.font-space {
+  font-family: 'Press Start 2P', monospace;
+}
+
+@keyframes twinkle {
+  0% { opacity: 0.8; }
+  50% { opacity: 1; }
+  100% { opacity: 0.8; }
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+@keyframes pulse-glow {
+  0% { box-shadow: 0 0 20px rgba(0, 255, 238, 0.3); }
+  50% { box-shadow: 0 0 20px rgba(0, 255, 238, 0.3), 0 0 50px rgba(0, 255, 238, 0.5); }
+  100% { box-shadow: 0 0 20px rgba(0, 255, 238, 0.3); }
+}
+
+@keyframes burn-disintegrate {
+  0% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.1); }
+  100% { opacity: 0; transform: scale(0.8) rotate(5deg); }
+}
+
+@keyframes drizzleFall {
+  from { transform: translateY(-10px); opacity: 1; }
+  to { transform: translateY(100vh); opacity: 0; }
+}
