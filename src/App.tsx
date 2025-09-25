@@ -13,6 +13,10 @@ import LevelPage from "./components/LevelPage";
 import JeopardyGame from "./components/JeopardyGame";
 import ScotlandYardGame from "./components/ScotlandYardGame";
 import ResultsScreen from "./components/ResultsScreen";
+import LoginPage from "./components/LoginPage";
+import SignupPage from "./components/SignUp";
+import TeamChoicePage from "./components/TeamChoicePage";
+import JoinTeam from "./components/JoinTeam";
 
 const queryClient = new QueryClient();
 
@@ -60,6 +64,22 @@ const App = () => {
             setRegistrationComplete={setRegistrationComplete}
           />
         );
+
+      case "teamChoice":
+        return (
+          <TeamChoicePage
+            onNavigate={handleNavigate}
+          />
+        );
+
+      case "jointeam":
+        return (
+          <JoinTeam
+            onNavigate={handleNavigate}
+          />
+        );
+
+
       case "levels":
         return <LevelPage onNavigate={handleNavigate} teamData={teamData} />;
       case "jeopardy":
@@ -76,6 +96,35 @@ const App = () => {
             onGameComplete={handleGameComplete}
           />
         );
+      
+      case "login":
+        return (
+          <LoginPage
+            onNavigate={handleNavigate}
+            setLoginComplete={(complete) => {
+              if (complete) {
+                setRegistrationComplete(true); // Optional: Or handle login state separately
+                handleNavigate("registration");
+              }
+            }}
+          />
+        );
+
+      case "signup":
+        return (
+          <SignupPage
+            onNavigate={handleNavigate}
+            setSignupComplete={(complete) => {
+              if (complete) {
+                // Optionally handle signup completion state here
+                // For example, you can navigate to login page after signup success
+                handleNavigate("login");
+              }
+            }}
+          />
+        );
+
+
       case "results":
         return (
           <ResultsScreen
