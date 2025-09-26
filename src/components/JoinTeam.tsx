@@ -22,8 +22,7 @@ const JoinTeam = ({ onNavigate }: JoinTeamProps) => {
   }
 
   try {
-    // Get JWT token (currently hardcoded, ideally should come from secureLocalStorage)
-    const token ="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MzMsImVtYWlsIjoic2FydGhhay5qYWluMjAyNEB2aXRzdHVkZW50LmFjLmluIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NTg4OTgxMDAsImV4cCI6MTc1ODg5OTAwMH0.oS0n-dTfLc0kRZR-epH0pBpKYs-v_Fm1kp781v1k4bM";
+    const token = localStorage.getItem("authToken");
 
     if (!token) {
       console.warn("No JWT token found. Cannot join team.");
@@ -37,7 +36,7 @@ const JoinTeam = ({ onNavigate }: JoinTeamProps) => {
     // Send POST request with Authorization header
     const res = await axios.post(
       `${import.meta.env.VITE_BE_URL}/teams/join`,
-      { teamCode },
+      { code: teamCode },
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -45,12 +44,13 @@ const JoinTeam = ({ onNavigate }: JoinTeamProps) => {
         },
       }
     );
+    console.log("Join Response:", res.data);
 
-    if (res.data.success) {
-      secureLocalStorage.setItem("teamCode", teamCode);
-      secureLocalStorage.setItem("teamName", res.data.teamName);
+    if (res.data.team) {
+      localStorage.setItem("teamCode", res.data.team.code);
+      localStorage.setItem("teamName", res.data.team.name);
 
-      setStatusMessage("Successfully joined team: " + res.data.teamName);
+      setStatusMessage("Successfully joined team: " + res.data.team.name);
       setStatusColor("text-green-400");
 
       setTimeout(() => {
@@ -61,12 +61,11 @@ const JoinTeam = ({ onNavigate }: JoinTeamProps) => {
       setStatusColor("text-red-400");
     }
   } catch (err) {
-    console.error(err);
+    console.error("Join error:", err);
     setStatusMessage("Error joining team. Try again later.");
     setStatusColor("text-red-400");
   }
 };
-
 
 
   return (

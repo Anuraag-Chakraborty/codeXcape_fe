@@ -26,6 +26,8 @@ interface TeamData {
 }
 
 const App = () => {
+  const API_URL = import.meta.env.VITE_BE_URL;
+  const userId = localStorage.getItem("authToken")
   const [isUserLoggedIn, setUserLoggedIn] = useState(false);
   const [currentPage, setCurrentPage] = useState<string>("home");
   const [teamData, setTeamData] = useState<TeamData>({
