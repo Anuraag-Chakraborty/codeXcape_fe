@@ -51,6 +51,13 @@ const App = () => {
     }
   }, []);
 
+  const handleLogout = () => {
+    localStorage.removeItem("authToken");
+    setRegistrationComplete(false);
+    setUserLoggedIn(false); // just in case
+    handleNavigate("home"); // or "login"
+  };
+
   const renderCurrentPage = () => {
     switch (currentPage) {
       case "home":
@@ -144,12 +151,25 @@ const App = () => {
         );
       default:
         return (
-          <HomePage
-            onNavigate={handleNavigate}
-            teamData={teamData}
-            setTeamData={setTeamData}
-            isRegistrationComplete={isRegistrationComplete}
-          />
+          <>
+            <HomePage
+              onNavigate={handleNavigate}
+              teamData={teamData}
+              setTeamData={setTeamData}
+              isRegistrationComplete={isRegistrationComplete}
+            />
+            
+            <div className="relative z-10">
+              {isRegistrationComplete && (
+                <button
+                  onClick={handleLogout}
+                  className="fixed top-4 right-4 px-4 py-2 bg-primary text-black rounded-md font-semibold hover:bg-primary-glow transition"
+                >
+                  Logout
+                </button>
+              )}
+            </div>
+          </>
         );
     }
   };
