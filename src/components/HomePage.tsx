@@ -157,8 +157,9 @@ const HomePage = ({ onNavigate, teamData, setTeamData, isRegistrationComplete }:
 
           <Button
             className="px-8 py-4 text-lg font-space tracking-wider bg-black/70 border-2 border-white/50 rounded-xl text-primary hover:bg-primary hover:text-black hover:border-black transition-all duration-300 shadow-lg shadow-primary/30 backdrop-blur-sm"
-            onClick={() => onNavigate("teamChoice")}
-          >
+            onClick={() => onNavigate("instructions")}
+          > 
+          {/* "instructions" for how to play */}
             HOW TO PLAY
           </Button>
         </motion.div>

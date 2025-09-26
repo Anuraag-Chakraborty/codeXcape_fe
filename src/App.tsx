@@ -18,6 +18,7 @@ import SignupPage from "./components/SignUp";
 import TeamChoicePage from "./components/TeamChoicePage";
 import JoinTeam from "./components/JoinTeam";
 
+
 const queryClient = new QueryClient();
 
 interface TeamData {
@@ -26,6 +27,7 @@ interface TeamData {
 }
 
 const App = () => {
+  const [isUserLoggedIn, setUserLoggedIn] = useState(false);
   const [currentPage, setCurrentPage] = useState<string>("home");
   const [teamData, setTeamData] = useState<TeamData>({
     teamName: "",
@@ -41,6 +43,13 @@ const App = () => {
   const handleGameComplete = (points: number) => {
     setTotalMozCoins(prev => prev + points);
   };
+
+  useEffect(() => {
+    const token = localStorage.getItem("authToken");
+    if(token){
+      setRegistrationComplete(true); 
+    }
+  }, []);
 
   const renderCurrentPage = () => {
     switch (currentPage) {
