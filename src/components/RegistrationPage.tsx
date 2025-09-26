@@ -3,7 +3,8 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
+import axios from "axios";
+import secureLocalStorage from "react-secure-storage";
 interface TeamData {
   teamName: string;
   members: string[];
@@ -49,27 +50,50 @@ const RegistrationPage = ({ onNavigate, teamData, setTeamData, setRegistrationCo
     return true;
   };
 
-  const handleSubmit = () => {
-    if (validateForm()) {
-      setStatusMessage("INFO SUBMITTED");
+  const handleSubmit = async () => {
+    if (!formData.teamName.trim()) {
+      setStatusMessage("PLEASE FILL TEAM NAME");
+      setStatusColor("text-red-400");
+      return;
+    }
+    try {
+        const token = localStorage.getItem("authToken");
+        if (!token) {
+        console.warn("No JWT token found. Cannot submit.");
+        setStatusMessage("LOGIN REQUIRED TO SUBMIT");
+        setStatusColor("text-red-400");
+        return;``
+      }
+      console.log("Token being sent:", token);
+
+      const res = await axios.post(
+        `${import.meta.env.VITE_BE_URL}/teams/create`,
+        { name: formData.teamName },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      console.log("Response:", res.data);
+      if (res.data.success) {
+      setStatusMessage("INFO SUBMITTED ✅");
       setStatusColor("text-green-400");
-      
-      // Update team data
-      setTeamData({
-        teamName: formData.teamName,
-        members: formData.members.map(m => m.name),
-      });
-      
-      setRegistrationComplete(true);
-      
       setTimeout(() => {
         onNavigate("home");
-      }, 1500);
+        }, 1000);
+
     } else {
-      setStatusMessage("PLEASE FILL ALL FIELDS CORRECTLY");
+      setStatusMessage(res.data.message || "SUBMISSION FAILED");
       setStatusColor("text-red-400");
     }
-  };
+  } catch (err) {
+    console.error("Submission failed:", err);
+    setStatusMessage("SUBMISSION FAILED");
+    setStatusColor("text-red-400");
+  }
+};
 
   return (
     <div className="min-h-screen flex items-center justify-center relative z-10 p-4">
@@ -127,64 +151,6 @@ const RegistrationPage = ({ onNavigate, teamData, setTeamData, setRegistrationCo
               className="bg-space-deep border border-primary/30 text-primary font-space placeholder:text-primary/40 focus:ring-2 focus:ring-primary/50"
             />
           </div>
-
-          {/* Team Leader Email */}
-          <div>
-            <Input
-              type="email"
-              placeholder="TEAM LEADER EMAIL ID"
-              value={formData.teamLeaderEmail}
-              onChange={(e) => setFormData({ ...formData, teamLeaderEmail: e.target.value })}
-              className="bg-space-deep border border-primary/30 text-primary font-space placeholder:text-primary/40 focus:ring-2 focus:ring-primary/50"
-            />
-          </div>
-
-          {/* Member Fields with AnimatePresence for smooth transitions */}
-          <AnimatePresence mode="popLayout">
-            {formData.members.map((member, index) => (
-              <motion.div
-                key={`member-${index}`}
-                className="grid grid-cols-1 md:grid-cols-2 gap-4"
-                initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ 
-                  opacity: 0, 
-                  y: -20, 
-                  scale: 0.95,
-                  transition: { duration: 0.3, ease: "easeInOut" }
-                }}
-                transition={{ 
-                  duration: 0.4, 
-                  delay: 0.8 + index * 0.1,
-                  ease: "easeOut"
-                }}
-                layout
-              >
-                <Input
-                  type="text"
-                  placeholder={`CREW MEMBER ${index + 1} NAME`}
-                  value={member.name}
-                  onChange={(e) => {
-                    const newMembers = [...formData.members];
-                    newMembers[index].name = e.target.value;
-                    setFormData({ ...formData, members: newMembers });
-                  }}
-                  className="bg-space-deep border border-primary/30 text-primary font-space placeholder:text-primary/40 focus:ring-2 focus:ring-primary/50"
-                />
-                <Input
-                  type="text"
-                  placeholder="REGISTRATION NUMBER"
-                  value={member.regNumber}
-                  onChange={(e) => {
-                    const newMembers = [...formData.members];
-                    newMembers[index].regNumber = e.target.value;
-                    setFormData({ ...formData, members: newMembers });
-                  }}
-                  className="bg-space-deep border border-primary/30 text-primary font-space placeholder:text-primary/40 focus:ring-2 focus:ring-primary/50"
-                />
-              </motion.div>
-            ))}
-          </AnimatePresence>
         </motion.div>
 
         {/* Submit Section */}

@@ -2,6 +2,8 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import axios from "axios";
+import secureLocalStorage from "react-secure-storage";
 
 interface JoinTeamProps {
   onNavigate: (page: string) => void;
@@ -12,18 +14,60 @@ const JoinTeam = ({ onNavigate }: JoinTeamProps) => {
   const [statusMessage, setStatusMessage] = useState("");
   const [statusColor, setStatusColor] = useState("text-red-400");
 
-  const handleJoin = () => {
-    if (teamCode.trim()) {
-      // Placeholder: add validation/logic for joining team with the code
-      setStatusMessage("Joining team with code: " + teamCode);
+  const handleJoin = async () => {
+  if (!teamCode.trim()) {
+    setStatusMessage("PLEASE ENTER TEAM CODE");
+    setStatusColor("text-red-400");
+    return;
+  }
+
+  try {
+    // Get JWT token (currently hardcoded, ideally should come from secureLocalStorage)
+    const token ="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MzMsImVtYWlsIjoic2FydGhhay5qYWluMjAyNEB2aXRzdHVkZW50LmFjLmluIiwicm9sZSI6InVzZXIiLCJpYXQiOjE3NTg4OTgxMDAsImV4cCI6MTc1ODg5OTAwMH0.oS0n-dTfLc0kRZR-epH0pBpKYs-v_Fm1kp781v1k4bM";
+
+    if (!token) {
+      console.warn("No JWT token found. Cannot join team.");
+      setStatusMessage("LOGIN REQUIRED TO JOIN TEAM");
+      setStatusColor("text-red-400");
+      return;
+    }
+
+    console.log("Token being sent:", token);
+
+    // Send POST request with Authorization header
+    const res = await axios.post(
+      `${import.meta.env.VITE_BE_URL}/teams/join`,
+      { teamCode },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+
+    if (res.data.success) {
+      secureLocalStorage.setItem("teamCode", teamCode);
+      secureLocalStorage.setItem("teamName", res.data.teamName);
+
+      setStatusMessage("Successfully joined team: " + res.data.teamName);
       setStatusColor("text-green-400");
 
-      // Add further navigation or API calls here
+      setTimeout(() => {
+        onNavigate("home");
+      }, 1500);
     } else {
-      setStatusMessage("Please enter a valid team code");
+      setStatusMessage(res.data.message || "Failed to join team");
       setStatusColor("text-red-400");
     }
-  };
+  } catch (err) {
+    console.error(err);
+    setStatusMessage("Error joining team. Try again later.");
+    setStatusColor("text-red-400");
+  }
+};
+
+
 
   return (
     <div className="min-h-screen flex items-center justify-center relative z-10 p-4">
