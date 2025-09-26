@@ -141,19 +141,19 @@ const HomePage = ({ onNavigate, teamData, setTeamData, isRegistrationComplete }:
 
       {/* Navigation Buttons - Made them conditionally visible based on registration status */}
       <motion.div
-  className="flex gap-8 mb-12"
-  initial={{ opacity: 0, y: 20 }}
-  animate={{ opacity: 1, y: 0 }}
-  transition={{ duration: 0.8, delay: 1 }}
->
-  {!isRegistrationComplete && (
-    <Button
-      className="px-8 py-4 text-lg font-space tracking-wider bg-black/70 border-2 border-white/50 rounded-xl text-primary hover:bg-primary hover:text-black hover:border-black transition-all duration-300 shadow-lg shadow-primary/30 backdrop-blur-sm"
-      onClick={() => onNavigate("login")}
-    >
-      LOGIN
-    </Button>
-  )}
+        className="flex gap-8 mb-12"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, delay: 1 }}
+      >
+        {!isRegistrationComplete && (
+          <Button
+            className="px-8 py-4 text-lg font-space tracking-wider bg-black/70 border-2 border-white/50 rounded-xl text-primary hover:bg-primary hover:text-black hover:border-black transition-all duration-300 shadow-lg shadow-primary/30 backdrop-blur-sm"
+            onClick={() => onNavigate("login")}
+          >
+            LOGIN
+          </Button>
+        )}
 
   <Button
     className="px-8 py-4 text-lg font-space tracking-wider bg-black/70 border-2 border-white/50 rounded-xl text-primary hover:bg-primary hover:text-black hover:border-black transition-all duration-300 shadow-lg shadow-primary/30 backdrop-blur-sm"

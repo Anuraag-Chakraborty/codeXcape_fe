@@ -18,7 +18,6 @@ import SignupPage from "./components/SignUp";
 import TeamChoicePage from "./components/TeamChoicePage";
 import JoinTeam from "./components/JoinTeam";
 
-
 const queryClient = new QueryClient();
 
 interface TeamData {
@@ -41,13 +40,13 @@ const App = () => {
   };
 
   const handleGameComplete = (points: number) => {
-    setTotalMozCoins(prev => prev + points);
+    setTotalMozCoins((prev) => prev + points);
   };
 
   useEffect(() => {
     const token = localStorage.getItem("authToken");
-    if(token){
-      setRegistrationComplete(true); 
+    if (token) {
+      setRegistrationComplete(true);
     }
   }, []);
 
@@ -80,67 +79,39 @@ const App = () => {
             setRegistrationComplete={setRegistrationComplete}
           />
         );
-
       case "teamChoice":
-        return (
-          <TeamChoicePage
-            onNavigate={handleNavigate}
-          />
-        );
-
+        return <TeamChoicePage onNavigate={handleNavigate} />;
       case "jointeam":
-        return (
-          <JoinTeam
-            onNavigate={handleNavigate}
-          />
-        );
-
-
+        return <JoinTeam onNavigate={handleNavigate} />;
       case "levels":
         return <LevelPage onNavigate={handleNavigate} teamData={teamData} />;
       case "jeopardy":
-        return (
-          <JeopardyGame
-            onNavigate={handleNavigate}
-            onGameComplete={handleGameComplete}
-          />
-        );
+        return <JeopardyGame onNavigate={handleNavigate} onGameComplete={handleGameComplete} />;
       case "scotland-yard":
-        return (
-          <ScotlandYardGame
-            onNavigate={handleNavigate}
-            onGameComplete={handleGameComplete}
-          />
-        );
-      
+        return <ScotlandYardGame onNavigate={handleNavigate} onGameComplete={handleGameComplete} />;
       case "login":
         return (
           <LoginPage
             onNavigate={handleNavigate}
             setLoginComplete={(complete) => {
               if (complete) {
-                setRegistrationComplete(true); // Optional: Or handle login state separately
+                setRegistrationComplete(true);
                 handleNavigate("registration");
               }
             }}
           />
         );
-
       case "signup":
         return (
           <SignupPage
             onNavigate={handleNavigate}
             setSignupComplete={(complete) => {
               if (complete) {
-                // Optionally handle signup completion state here
-                // For example, you can navigate to login page after signup success
                 handleNavigate("login");
               }
             }}
           />
         );
-
-
       case "results":
         return (
           <ResultsScreen
@@ -151,25 +122,12 @@ const App = () => {
         );
       default:
         return (
-          <>
-            <HomePage
-              onNavigate={handleNavigate}
-              teamData={teamData}
-              setTeamData={setTeamData}
-              isRegistrationComplete={isRegistrationComplete}
-            />
-            
-            <div className="relative z-10">
-              {isRegistrationComplete && (
-                <button
-                  onClick={handleLogout}
-                  className="fixed top-4 right-4 px-4 py-2 bg-primary text-black rounded-md font-semibold hover:bg-primary-glow transition"
-                >
-                  Logout
-                </button>
-              )}
-            </div>
-          </>
+          <HomePage
+            onNavigate={handleNavigate}
+            teamData={teamData}
+            setTeamData={setTeamData}
+            isRegistrationComplete={isRegistrationComplete}
+          />
         );
     }
   };
@@ -179,16 +137,22 @@ const App = () => {
       <TooltipProvider>
         <Toaster />
         <Sonner />
-        
-        {/* Main Application */}
+
         <>
           {/* Starfield Background */}
           <StarfieldBackground />
-          
-          {/* Current Page Content */}
-          <div className="relative z-10">
-            {renderCurrentPage()}
-          </div>
+
+          {/* Logout Button shown on all pages if logged in */}
+          {isRegistrationComplete && (
+            <button
+              onClick={handleLogout}
+              className="fixed top-4 right-4 px-4 py-2 bg-primary text-black rounded-md font-semibold hover:bg-primary-glow transition z-50"
+            >
+              Logout
+            </button>
+          )}
+
+          <div className="relative z-10">{renderCurrentPage()}</div>
         </>
       </TooltipProvider>
     </QueryClientProvider>
