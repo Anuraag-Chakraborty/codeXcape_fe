@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import Jeopardy from './components/Jeopardy';
-import Timer from './components/Timer';
-import './Jeopardy.css'
+import React, { useState } from "react";
+import Jeopardy from "./components/Jeopardy";
+import Timer from "./components/Timer";
+import "./Jeopardy.css";
 
-function App() {
+function App({ onComplete }: { onComplete?: () => void }) {
   const [showTimer, setShowTimer] = useState(true);
 
   const handleTimerEnd = () => {
@@ -12,7 +12,11 @@ function App() {
 
   return (
     <>
-      {showTimer ? <Timer onTimerEnd={handleTimerEnd} /> : <Jeopardy />}
+      {showTimer ? (
+        <Timer onTimerEnd={handleTimerEnd} />
+      ) : (
+        <Jeopardy onComplete={onComplete} />
+      )}
     </>
   );
 }

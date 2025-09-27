@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import './Jeopardy.css';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import "./Jeopardy.css";
 
 const API_BASE = import.meta.env.VITE_BE_URL;
 const axiosInstance = axios.create({
@@ -12,7 +12,7 @@ const categories = [
   { id: "91505992-b5fd-4541-bfa0-02ecf2415bb6", name: "Language Lab" },
   { id: "b15b5d75-18d7-4c12-a6fe-729b117764fc", name: "What's That Tech?" },
   { id: "c8035958-0082-4948-a587-bb53212a36c3", name: "Brain Benders" },
-  { id: "e6a60e63-08ef-4d5e-9b55-9eeb5e6f0794", name: "Expand It!!" }
+  { id: "e6a60e63-08ef-4d5e-9b55-9eeb5e6f0794", name: "Expand It!!" },
 ];
 
 const difficultyMap = {
@@ -20,10 +20,10 @@ const difficultyMap = {
   400: "Easy",
   600: "Medium",
   800: "Hard",
-  1000: "Very Hard"
+  1000: "Very Hard",
 };
 
-export default function Jeopardy() {
+export default function Jeopardy({ onComplete }: { onComplete?: () => void }) {
   const [score, setScore] = useState(0);
   const [answeredQuestions, setAnsweredQuestions] = useState([]); // categoryId-difficulty
   const [currentQuestion, setCurrentQuestion] = useState(null);
@@ -33,25 +33,25 @@ export default function Jeopardy() {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  
-
   // Fetch already attempted questions for this team
   const fetchAttemptedQuestions = async () => {
-  try {
-    const USER_ID=localStorage.getItem("userId");
-    const TEAM_ID=localStorage.getItem("teamId");
-    const JWT_TOKEN=localStorage.getItem("authToken");
-    const res = await axiosInstance.post("/jeopardy/player/get-attempted", {
-      teamId: TEAM_ID
-    },
-    {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${JWT_TOKEN}`
+    try {
+      const USER_ID = localStorage.getItem("userId");
+      const TEAM_ID = localStorage.getItem("teamId");
+      const JWT_TOKEN = localStorage.getItem("authToken");
+      const res = await axiosInstance.post(
+        "/jeopardy/player/get-attempted",
+        {
+          teamId: TEAM_ID,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${JWT_TOKEN}`,
+          },
         }
-      }
-  );
-    if (res.data?.attempted) setAnsweredQuestions(res.data.attempted); 
+      );
+      if (res.data?.attempted) setAnsweredQuestions(res.data.attempted);
     } catch (err) {
       console.error("Failed to fetch attempted questions:", err);
     }
@@ -59,19 +59,20 @@ export default function Jeopardy() {
 
   const fetchTeamPoints = async () => {
     try {
-      const USER_ID=localStorage.getItem("userId");
-      const TEAM_ID=localStorage.getItem("teamId");
+      const USER_ID = localStorage.getItem("userId");
+      const TEAM_ID = localStorage.getItem("teamId");
 
-      const JWT_TOKEN=localStorage.getItem("authToken");
-      const res = await axiosInstance.post("/jeopardy/player/teampoints",
-         { teamId: TEAM_ID },
-         {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${JWT_TOKEN}`
+      const JWT_TOKEN = localStorage.getItem("authToken");
+      const res = await axiosInstance.post(
+        "/jeopardy/player/teampoints",
+        { teamId: TEAM_ID },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${JWT_TOKEN}`,
+          },
         }
-      }
-        );
+      );
       setScore(res.data?.team?.teamPoints ?? 0);
     } catch (err) {
       console.error("Failed to fetch team points:", err);
@@ -83,81 +84,84 @@ export default function Jeopardy() {
     fetchAttemptedQuestions();
   }, []);
 
-   const handleOptionSelect = (option) => {
+  const handleOptionSelect = (option) => {
     if (submitted) return;
     setSelectedOption(option);
   };
 
   const handleQuestionClick = async (questionId, categoryId, difficulty) => {
-  if (answeredQuestions.includes(questionId) || loading) return;
+    if (answeredQuestions.includes(questionId) || loading) return;
 
-  try {
-    setLoading(true);
-    const USER_ID=localStorage.getItem("userId");
-    const TEAM_ID=localStorage.getItem("teamId");
-    const JWT_TOKEN=localStorage.getItem("authToken");
-    const response = await axiosInstance.post("/jeopardy/player/choose-question", {
-      userId: USER_ID,
-      teamId: TEAM_ID,
-      categoryId,   // send UUID only
-      difficulty    // send difficulty string
-    },
-    {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${JWT_TOKEN}`
+    try {
+      setLoading(true);
+      const USER_ID = localStorage.getItem("userId");
+      const TEAM_ID = localStorage.getItem("teamId");
+      const JWT_TOKEN = localStorage.getItem("authToken");
+      const response = await axiosInstance.post(
+        "/jeopardy/player/choose-question",
+        {
+          userId: USER_ID,
+          teamId: TEAM_ID,
+          categoryId, // send UUID only
+          difficulty, // send difficulty string
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${JWT_TOKEN}`,
+          },
         }
+      );
+
+      // Add question to answered list (frontend tracking)
+      setAnsweredQuestions((prev) => [...prev, questionId]);
+
+      const backendQuestionId = response.data.question.id;
+
+      setCurrentQuestion({
+        frontendId: questionId,
+        id: backendQuestionId,
+        value: response.data.question.points || 0,
+        displayValue: response.data.question.points || 0,
+        question: response.data.question.questionText,
+        options: response.data.question.options,
+      });
+
+      setSelectedOption(null);
+      setFeedback(null);
+      setSubmitted(false);
+      setModalVisible(true);
+    } catch (err) {
+      console.error("Choose question error:", err);
+      alert(`Failed to choose question: ${err.message}`);
+    } finally {
+      setLoading(false);
     }
-  );
-
-    // Add question to answered list (frontend tracking)
-    setAnsweredQuestions(prev => [...prev, questionId]);
-
-    const backendQuestionId = response.data.question.id;
-
-    setCurrentQuestion({
-      frontendId: questionId,
-      id: backendQuestionId,
-      value: response.data.question.points || 0,
-      displayValue: response.data.question.points || 0,
-      question: response.data.question.questionText,
-      options: response.data.question.options
-    });
-
-    setSelectedOption(null);
-    setFeedback(null);
-    setSubmitted(false);
-    setModalVisible(true);
-  } catch (err) {
-    console.error("Choose question error:", err);
-    alert(`Failed to choose question: ${err.message}`);
-  } finally {
-    setLoading(false);
-  }
-};
-
+  };
 
   const handleAnswerSubmit = async () => {
     if (!selectedOption || !currentQuestion?.id || loading) return;
     try {
       setLoading(true);
-      const USER_ID=localStorage.getItem("userId");
-      const TEAM_ID=localStorage.getItem("teamId");
+      const USER_ID = localStorage.getItem("userId");
+      const TEAM_ID = localStorage.getItem("teamId");
 
-      const JWT_TOKEN=localStorage.getItem("authToken");
-      const res = await axiosInstance.post("/jeopardy/player/submit-answer", {
-        userId: USER_ID,
-        teamId: TEAM_ID,
-        questionId: currentQuestion.id,
-        selectedOption
-      },
-      {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${JWT_TOKEN}`
+      const JWT_TOKEN = localStorage.getItem("authToken");
+      const res = await axiosInstance.post(
+        "/jeopardy/player/submit-answer",
+        {
+          userId: USER_ID,
+          teamId: TEAM_ID,
+          questionId: currentQuestion.id,
+          selectedOption,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${JWT_TOKEN}`,
+          },
         }
-      }
-    );
+      );
 
       setFeedback(res.data.correct ? "correct" : "incorrect");
       setSubmitted(true);
@@ -179,32 +183,37 @@ export default function Jeopardy() {
   };
 
   const renderGameBoard = () => {
-  const values = [200, 400, 600, 800, 1000];
+    const values = [200, 400, 600, 800, 1000];
 
-  return (
-    <>
-      {categories.map(cat => (
-        <div key={`header-${cat.id}`} className="category-header">{cat.name}</div>
-      ))}
+    return (
+      <>
+        {categories.map((cat) => (
+          <div key={`header-${cat.id}`} className="category-header">
+            {cat.name}
+          </div>
+        ))}
 
-      {values.map(val =>
-        categories.map(cat => {
-          const difficulty = difficultyMap[val];
-          const questionId = `${cat.id}-${difficulty}`; // for frontend tracking
-          const isAnswered = answeredQuestions.includes(questionId); // exhausted globally per team
+        {values.map((val) =>
+          categories.map((cat) => {
+            const difficulty = difficultyMap[val];
+            const questionId = `${cat.id}-${difficulty}`; // for frontend tracking
+            const isAnswered = answeredQuestions.includes(questionId); // exhausted globally per team
 
-          return (
-            <div
-              key={questionId}
-              className={`value-cell ${isAnswered ? "answered" : ""}`}
-              onClick={() => !isAnswered && handleQuestionClick(questionId, cat.id, difficulty)}
-              role="button"
-              aria-disabled={isAnswered}
-              tabIndex={isAnswered ? -1 : 0}
-              onKeyDown={e => {
-                if (!isAnswered && (e.key === "Enter" || e.key === " ")) {
-                  e.preventDefault();
-                  handleQuestionClick(questionId, cat.id, difficulty);
+            return (
+              <div
+                key={questionId}
+                className={`value-cell ${isAnswered ? "answered" : ""}`}
+                onClick={() =>
+                  !isAnswered &&
+                  handleQuestionClick(questionId, cat.id, difficulty)
+                }
+                role="button"
+                aria-disabled={isAnswered}
+                tabIndex={isAnswered ? -1 : 0}
+                onKeyDown={(e) => {
+                  if (!isAnswered && (e.key === "Enter" || e.key === " ")) {
+                    e.preventDefault();
+                    handleQuestionClick(questionId, cat.id, difficulty);
                   }
                 }}
               >
@@ -216,46 +225,109 @@ export default function Jeopardy() {
       </>
     );
   };
+  // Determine completion: all category/difficulty combos answered
+  const valuesList = [200, 400, 600, 800, 1000];
+  const expectedIds = categories.flatMap((cat) =>
+    valuesList.map((v) => `${cat.id}-${difficultyMap[v]}`)
+  );
+  const normalizedAnswered = (answeredQuestions || [])
+    .map((x: any) => {
+      if (typeof x === "string") return x;
+      if (x && typeof x === "object") {
+        const cat = x.categoryId || x.category?.id || x.categoryID;
+        const diff = x.difficulty || x.level || x.difficultyLabel;
+        if (cat && diff) return `${cat}-${diff}`;
+      }
+      return null;
+    })
+    .filter(Boolean) as string[];
+  const allAnswered = expectedIds.every((id) =>
+    normalizedAnswered.includes(id)
+  );
+
   return (
     <>
       <div className="score-badge">Score: {score}</div>
       <div className="game-board">{renderGameBoard()}</div>
 
+      {allAnswered && !modalVisible && (
+        <div
+          className="completion-controls"
+          style={{ textAlign: "center", marginTop: "1rem" }}
+        >
+          <button
+            className="space-button px-6 py-2"
+            onClick={() => {
+              const TEAM_ID = localStorage.getItem("teamId") || "default";
+              localStorage.setItem(`level1Completed:${TEAM_ID}`, "true");
+              onComplete?.();
+            }}
+          >
+            Complete Level 1
+          </button>
+        </div>
+      )}
+
       {modalVisible && currentQuestion && (
         <div className="modal">
           <div className="modal-content">
-            <div className="question-value">{currentQuestion.displayValue || currentQuestion.value}</div>
-            <div className={feedback === "correct" ? "correct" : feedback === "incorrect" ? "incorrect" : ""}>
-              {feedback === "correct" ? "Correct!" : feedback === "incorrect" ? "Incorrect!" : currentQuestion.question}
+            <div className="question-value">
+              {currentQuestion.displayValue || currentQuestion.value}
+            </div>
+            <div
+              className={
+                feedback === "correct"
+                  ? "correct"
+                  : feedback === "incorrect"
+                    ? "incorrect"
+                    : ""
+              }
+            >
+              {feedback === "correct"
+                ? "Correct!"
+                : feedback === "incorrect"
+                  ? "Incorrect!"
+                  : currentQuestion.question}
             </div>
 
             {!feedback && (
               <>
                 <div className="options-container">
-                  {Object.entries(currentQuestion.options).map(([key, value], i) => (
-                    <label key={i} className="option-item">
-                      <input
-                        type="radio"
-                        name="answerOption"
-                        value={key}
-                        checked={selectedOption === key}
-                        onChange={() => handleOptionSelect(key)}
-                        disabled={submitted || loading}
-                      />
-                      <span>{key}: {value}</span>
-                    </label>
-                  ))}
+                  {Object.entries(currentQuestion.options).map(
+                    ([key, value], i) => (
+                      <label key={i} className="option-item">
+                        <input
+                          type="radio"
+                          name="answerOption"
+                          value={key}
+                          checked={selectedOption === key}
+                          onChange={() => handleOptionSelect(key)}
+                          disabled={submitted || loading}
+                        />
+                        <span>
+                          {key}: {String(value)}
+                        </span>
+                      </label>
+                    )
+                  )}
                 </div>
 
-                <button onClick={handleAnswerSubmit} disabled={!selectedOption || submitted || loading}>
+                <button
+                  onClick={handleAnswerSubmit}
+                  disabled={!selectedOption || submitted || loading}
+                >
                   {loading ? "Submitting..." : "Submit"}
                 </button>
-                <button onClick={handleContinue} disabled={loading}>Skip / Continue</button>
+                <button onClick={handleContinue} disabled={loading}>
+                  Skip / Continue
+                </button>
               </>
             )}
 
             {feedback && (
-              <button onClick={handleContinue} disabled={loading}>Continue</button>
+              <button onClick={handleContinue} disabled={loading}>
+                Continue
+              </button>
             )}
           </div>
         </div>

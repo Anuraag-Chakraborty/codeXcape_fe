@@ -62,14 +62,15 @@ const App = () => {
   }, []);
 
   const handleLogout = () => {
-    setTeamData({ teamName: "", members: [] });
+    // Only clear auth-related data; preserve team and progress state
     localStorage.removeItem("authToken");
     setRegistrationComplete(false);
-    setUserLoggedIn(false); // just in case
-    localStorage.clear();
-    console.log(JSON.stringify({ localStorage }, null, 2));
-    handleNavigate("home"); // or "login"
-    window.location.reload();
+    setUserLoggedIn(false);
+    setTeamData({
+      teamName: localStorage.getItem("teamName") || "",
+      members: [],
+    });
+    handleNavigate("home");
   };
 
   const renderCurrentPage = () => {
@@ -104,7 +105,11 @@ const App = () => {
         return <LevelPage onNavigate={handleNavigate} teamData={teamData} />;
       case "jeopardy":
         return (
-          <Jeopardy/>
+          <Jeopardy
+            onComplete={() => {
+              handleNavigate("levels");
+            }}
+          />
         );
       case "scotland-yard":
         return (

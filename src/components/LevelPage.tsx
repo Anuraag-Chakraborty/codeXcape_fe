@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 
 interface TeamData {
@@ -33,39 +33,69 @@ const LevelPage = ({ onNavigate, teamData }: LevelPageProps) => {
       id: 2,
       name: "SCOTLAND YARD",
       description: "Hunt down Mr. X through space",
-      isUnlocked: true,
+      isUnlocked: false,
       isCompleted: false,
     },
     {
       id: 3,
       name: "FINAL MISSION",
       description: "The ultimate space challenge",
-      isUnlocked: true,
+      isUnlocked: false,
       isCompleted: false,
     },
   ]);
 
   const [burningLevel, setBurningLevel] = useState<number | null>(null);
 
+  // On mount, if level 1 was completed earlier, reflect it and unlock level 2
+  useEffect(() => {
+    const TEAM_ID = localStorage.getItem("teamId") || "default";
+    const completed =
+      localStorage.getItem(`level1Completed:${TEAM_ID}`) === "true";
+    if (completed) {
+      setLevels((prev) =>
+        prev.map((l) => {
+          if (l.id === 1) return { ...l, isCompleted: true };
+          if (l.id === 2) return { ...l, isUnlocked: true };
+          return l;
+        })
+      );
+    }
+  }, []);
+
+  const lock = (levelId) => {
+    setLevels((levels) =>
+      levels.map((level) => {
+        if (level.id === levelId)
+          return { ...level[levelId - 1], isUnlocked: false };
+        return level;
+      })
+    );
+  };
+
   const handleLevelClick = (levelId: number) => {
-    const level = levels.find(l => l.id === levelId);
+    const level = levels.find((l) => l.id === levelId);
     if (!level?.isUnlocked) return;
+    if (level.isCompleted) return; // block opening completed levels
 
     if (levelId === 1) {
       onNavigate("jeopardy");
+      lock(levelId);
     } else if (levelId === 2) {
       onNavigate("scotland-yard");
+      lock(levelId);
     } else {
       alert(`Level ${levelId} coming soon!`);
+      lock(levelId);
     }
   };
 
   const unlockNextLevel = (completedLevelId: number) => {
     setBurningLevel(completedLevelId);
-    
+
     setTimeout(() => {
-      setLevels(prevLevels => 
-        prevLevels.map(level => {
+      setLevels((prevLevels) =>
+        prevLevels.map((level) => {
           if (level.id === completedLevelId) {
             return { ...level, isCompleted: true };
           }
@@ -79,10 +109,7 @@ const LevelPage = ({ onNavigate, teamData }: LevelPageProps) => {
     }, 1500);
   };
 
-  // Simulate level completion for demo
-  const simulateCompletion = (levelId: number) => {
-    unlockNextLevel(levelId);
-  };
+  // When navigated back after real completion, the above effect handles unlocks.
 
   return (
     <div className="min-h-screen flex flex-col relative z-10">
@@ -92,23 +119,32 @@ const LevelPage = ({ onNavigate, teamData }: LevelPageProps) => {
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.8 }}
-        whileHover={{ 
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          boxShadow: '0 0 30px rgba(0, 255, 238, 0.3)'
+        whileHover={{
+          backgroundColor: "rgba(0, 0, 0, 0.5)",
+          boxShadow: "0 0 30px rgba(0, 255, 238, 0.3)",
         }}
       >
         <h3 className="text-primary font-space font-bold text-lg mb-4 text-center border-b border-primary/30 pb-2">
           {teamData.teamName || "SPACE CREW"}
         </h3>
         <div className="space-y-2">
-          {(teamData.members || []).filter(member => 
-            member && member.trim() && !member.includes("PLAYER") && !member.includes("NAME")
-          ).map((member, index) => (
-            <p key={index} className="text-secondary font-space text-sm">
-              {member}
-            </p>
-          ))}
-          {(!teamData.members || teamData.members.filter(m => m && m.trim() && !m.includes("PLAYER")).length === 0) && (
+          {(teamData.members || [])
+            .filter(
+              (member) =>
+                member &&
+                member.trim() &&
+                !member.includes("PLAYER") &&
+                !member.includes("NAME")
+            )
+            .map((member, index) => (
+              <p key={index} className="text-secondary font-space text-sm">
+                {member}
+              </p>
+            ))}
+          {(!teamData.members ||
+            teamData.members.filter(
+              (m) => m && m.trim() && !m.includes("PLAYER")
+            ).length === 0) && (
             <p className="text-muted-foreground font-space text-sm italic">
               No crew members specified
             </p>
@@ -123,34 +159,47 @@ const LevelPage = ({ onNavigate, teamData }: LevelPageProps) => {
             <motion.div
               key={level.id}
               className={`cosmic-portal p-8 cursor-pointer relative overflow-hidden ${
-                !level.isUnlocked ? 'opacity-50 cursor-not-allowed' : ''
+                !level.isUnlocked ? "opacity-50 cursor-not-allowed" : ""
               } ${
-                burningLevel === level.id ? 'animate-burn-disintegrate' : ''
+                burningLevel === level.id ? "animate-burn-disintegrate" : ""
               }`}
               initial={{ opacity: 0, scale: 0.8, y: 50 }}
-              animate={{ 
-                opacity: burningLevel === level.id ? [1, 0.5, 0] : (level.isUnlocked ? 1 : 0.5), 
-                scale: burningLevel === level.id ? [1, 1.1, 0.8] : 1, 
-                y: 0 
+              animate={{
+                opacity:
+                  burningLevel === level.id
+                    ? [1, 0.5, 0]
+                    : level.isUnlocked
+                      ? 1
+                      : 0.5,
+                scale: burningLevel === level.id ? [1, 1.1, 0.8] : 1,
+                y: 0,
               }}
               transition={{ duration: 0.8, delay: index * 0.2 }}
               onClick={() => handleLevelClick(level.id)}
-              whileHover={level.isUnlocked ? { 
-                scale: 1.05, 
-                y: -10,
-                boxShadow: "0 20px 40px rgba(139, 69, 19, 0.3)"
-              } : {}}
+              whileHover={
+                level.isUnlocked
+                  ? {
+                      scale: 1.05,
+                      y: -10,
+                      boxShadow: "0 20px 40px rgba(139, 69, 19, 0.3)",
+                    }
+                  : {}
+              }
             >
               {/* Portal Energy Effect */}
               <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-accent/20 to-secondary/20 animate-pulse-glow" />
-              
+
               {/* Level Content */}
               <div className="relative z-10 text-center">
                 {/* Level Number */}
                 <motion.div
                   className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center text-2xl font-space font-bold text-background"
                   animate={level.isUnlocked ? { rotate: [0, 360] } : {}}
-                  transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+                  transition={{
+                    duration: 10,
+                    repeat: Infinity,
+                    ease: "linear",
+                  }}
                 >
                   {level.id}
                 </motion.div>
@@ -213,24 +262,7 @@ const LevelPage = ({ onNavigate, teamData }: LevelPageProps) => {
         </div>
       </div>
 
-      {/* Demo Completion Buttons (for testing) */}
-      <motion.div
-        className="absolute bottom-6 right-6 space-y-2"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.5 }}
-      >
-        <div className="text-xs text-muted-foreground font-space mb-2">Demo Controls:</div>
-        {levels.filter(l => l.isUnlocked && !l.isCompleted).map(level => (
-          <Button
-            key={level.id}
-            className="space-button text-xs px-3 py-1"
-            onClick={() => simulateCompletion(level.id)}
-          >
-            Complete Level {level.id}
-          </Button>
-        ))}
-      </motion.div>
+      {/* Demo Controls removed; completion now depends on actual game */}
 
       {/* Floating objects and extra cosmic elements removed */}
     </div>
