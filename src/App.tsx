@@ -27,7 +27,7 @@ interface TeamData {
 
 const App = () => {
   const API_URL = import.meta.env.VITE_BE_URL;
-  const userId = localStorage.getItem("authToken")
+  const userId = localStorage.getItem("authToken");
   const [isUserLoggedIn, setUserLoggedIn] = useState(false);
   const [currentPage, setCurrentPage] = useState<string>("home");
   const [teamData, setTeamData] = useState<TeamData>({
@@ -50,13 +50,26 @@ const App = () => {
     if (token) {
       setRegistrationComplete(true);
     }
+    const storedTeamName = localStorage.getItem("teamName");
+    const storedTeamCode = localStorage.getItem("teamCode");
+    if (storedTeamName) {
+      setTeamData((prev) => ({ ...prev, teamName: storedTeamName }));
+    }
+    // Optionally use team code later for fetching full team data if needed
+    if (storedTeamCode) {
+      // no-op for now
+    }
   }, []);
 
   const handleLogout = () => {
+    setTeamData({ teamName: "", members: [] });
     localStorage.removeItem("authToken");
     setRegistrationComplete(false);
     setUserLoggedIn(false); // just in case
+    localStorage.clear();
+    console.log(JSON.stringify({ localStorage }, null, 2));
     handleNavigate("home"); // or "login"
+    window.location.reload();
   };
 
   const renderCurrentPage = () => {
@@ -84,13 +97,25 @@ const App = () => {
       case "teamChoice":
         return <TeamChoicePage onNavigate={handleNavigate} />;
       case "jointeam":
-        return <JoinTeam onNavigate={handleNavigate} />;
+        return (
+          <JoinTeam onNavigate={handleNavigate} setTeamData={setTeamData} />
+        );
       case "levels":
         return <LevelPage onNavigate={handleNavigate} teamData={teamData} />;
       case "jeopardy":
-        return <JeopardyGame onNavigate={handleNavigate} onGameComplete={handleGameComplete} />;
+        return (
+          <JeopardyGame
+            onNavigate={handleNavigate}
+            onGameComplete={handleGameComplete}
+          />
+        );
       case "scotland-yard":
-        return <ScotlandYardGame onNavigate={handleNavigate} onGameComplete={handleGameComplete} />;
+        return (
+          <ScotlandYardGame
+            onNavigate={handleNavigate}
+            onGameComplete={handleGameComplete}
+          />
+        );
       case "login":
         return (
           <LoginPage
@@ -98,7 +123,7 @@ const App = () => {
             setLoginComplete={(complete) => {
               if (complete) {
                 setRegistrationComplete(true);
-                handleNavigate("registration");
+                handleNavigate("teamChoice");
               }
             }}
           />

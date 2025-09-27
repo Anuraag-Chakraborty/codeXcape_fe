@@ -5,68 +5,78 @@ import { Input } from "@/components/ui/input";
 import axios from "axios";
 import secureLocalStorage from "react-secure-storage";
 
-interface JoinTeamProps {
-  onNavigate: (page: string) => void;
+interface TeamData {
+  teamName: string;
+  members: string[];
 }
 
-const JoinTeam = ({ onNavigate }: JoinTeamProps) => {
+interface JoinTeamProps {
+  onNavigate: (page: string) => void;
+  setTeamData?: (data: TeamData) => void;
+}
+
+const JoinTeam = ({ onNavigate, setTeamData }: JoinTeamProps) => {
   const [teamCode, setTeamCode] = useState("");
   const [statusMessage, setStatusMessage] = useState("");
   const [statusColor, setStatusColor] = useState("text-red-400");
 
   const handleJoin = async () => {
-  if (!teamCode.trim()) {
-    setStatusMessage("PLEASE ENTER TEAM CODE");
-    setStatusColor("text-red-400");
-    return;
-  }
-
-  try {
-    const token = localStorage.getItem("authToken");
-
-    if (!token) {
-      console.warn("No JWT token found. Cannot join team.");
-      setStatusMessage("LOGIN REQUIRED TO JOIN TEAM");
+    if (!teamCode.trim()) {
+      setStatusMessage("PLEASE ENTER TEAM CODE");
       setStatusColor("text-red-400");
       return;
     }
 
-    console.log("Token being sent:", token);
+    try {
+      const token = localStorage.getItem("authToken");
 
-    // Send POST request with Authorization header
-    const res = await axios.post(
-      `${import.meta.env.VITE_BE_URL}/teams/join`,
-      { code: teamCode },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
+      if (!token) {
+        console.warn("No JWT token found. Cannot join team.");
+        setStatusMessage("LOGIN REQUIRED TO JOIN TEAM");
+        setStatusColor("text-red-400");
+        return;
       }
-    );
-    console.log("Join Response:", res.data);
 
-    if (res.data.team) {
-      localStorage.setItem("teamCode", res.data.team.code);
-      localStorage.setItem("teamName", res.data.team.name);
+      console.log("Token being sent:", token);
 
-      setStatusMessage("Successfully joined team: " + res.data.team.name);
-      setStatusColor("text-green-400");
+      // Send POST request with Authorization header
+      const res = await axios.post(
+        `${import.meta.env.VITE_BE_URL}/teams/join`,
+        { code: teamCode },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+      console.log("Join Response:", res.data);
 
-      setTimeout(() => {
-        onNavigate("home");
-      }, 1500);
-    } else {
-      setStatusMessage(res.data.message || "Failed to join team");
+      if (res.data.team) {
+        localStorage.setItem("teamCode", res.data.team.code);
+        localStorage.setItem("teamName", res.data.team.name);
+        // Update global team state if setter provided
+        setTeamData?.({
+          teamName: res.data.team.name,
+          members: res.data.team.members || [],
+        });
+
+        setStatusMessage("Successfully joined team: " + res.data.team.name);
+        setStatusColor("text-green-400");
+
+        setTimeout(() => {
+          onNavigate("home");
+        }, 1000);
+      } else {
+        setStatusMessage(res.data.message || "Failed to join team");
+        setStatusColor("text-red-400");
+      }
+    } catch (err) {
+      console.error("Join error:", err);
+      setStatusMessage("Error joining team. Try again later.");
       setStatusColor("text-red-400");
     }
-  } catch (err) {
-    console.error("Join error:", err);
-    setStatusMessage("Error joining team. Try again later.");
-    setStatusColor("text-red-400");
-  }
-};
-
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center relative z-10 p-4">
@@ -105,7 +115,7 @@ const JoinTeam = ({ onNavigate }: JoinTeamProps) => {
           </Button>
           <Button
             className="space-button px-8 py-3 font-space tracking-wider"
-            onClick={() => onNavigate("team-choice")}
+            onClick={() => onNavigate("teamChoice")}
           >
             BACK
           </Button>

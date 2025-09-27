@@ -17,36 +17,49 @@ interface RegistrationPageProps {
   setRegistrationComplete: (complete: boolean) => void;
 }
 
-const RegistrationPage = ({ onNavigate, teamData, setTeamData, setRegistrationComplete }: RegistrationPageProps) => {
+const RegistrationPage = ({
+  onNavigate,
+  teamData,
+  setTeamData,
+  setRegistrationComplete,
+}: RegistrationPageProps) => {
   const [numMembers, setNumMembers] = useState(4);
   const [formData, setFormData] = useState({
     teamName: teamData.teamName || "",
     teamLeaderEmail: "",
-    members: Array(numMembers).fill("").map((_, i) => ({
-      name: teamData.members[i] || "",
-      regNumber: "",
-    })),
+    members: Array(numMembers)
+      .fill("")
+      .map((_, i) => ({
+        name: teamData.members[i] || "",
+        regNumber: "",
+      })),
   });
   const [statusMessage, setStatusMessage] = useState("INFO NOT SUBMITTED");
   const [statusColor, setStatusColor] = useState("text-red-400");
 
   const handleMemberCountChange = (count: number) => {
     setNumMembers(count);
-    const newMembers = Array(count).fill("").map((_, i) => ({
-      name: formData.members[i]?.name || "",
-      regNumber: formData.members[i]?.regNumber || "",
-    }));
+    const newMembers = Array(count)
+      .fill("")
+      .map((_, i) => ({
+        name: formData.members[i]?.name || "",
+        regNumber: formData.members[i]?.regNumber || "",
+      }));
     setFormData({ ...formData, members: newMembers });
   };
 
   const validateForm = () => {
     if (!formData.teamName.trim()) return false;
-    if (!formData.teamLeaderEmail.trim() || !formData.teamLeaderEmail.includes("@")) return false;
-    
+    if (
+      !formData.teamLeaderEmail.trim() ||
+      !formData.teamLeaderEmail.includes("@")
+    )
+      return false;
+
     for (const member of formData.members) {
       if (!member.name.trim() || !member.regNumber.trim()) return false;
     }
-    
+
     return true;
   };
 
@@ -57,15 +70,14 @@ const RegistrationPage = ({ onNavigate, teamData, setTeamData, setRegistrationCo
       return;
     }
     try {
-        const token = localStorage.getItem("authToken");
-        if (!token) {
+      const token = localStorage.getItem("authToken");
+      if (!token) {
         console.warn("No JWT token found. Cannot submit.");
         setStatusMessage("LOGIN REQUIRED TO SUBMIT");
         setStatusColor("text-red-400");
-        return;``
+        return;
       }
       console.log("Token being sent:", token);
-
       const res = await axios.post(
         `${import.meta.env.VITE_BE_URL}/teams/create`,
         { name: formData.teamName },
@@ -77,23 +89,46 @@ const RegistrationPage = ({ onNavigate, teamData, setTeamData, setRegistrationCo
         }
       );
       console.log("Response:", res.data);
-      if (res.data.success) {
-      setStatusMessage("INFO SUBMITTED ✅");
-      setStatusColor("text-green-400");
-      setTimeout(() => {
-        onNavigate("home");
-        }, 1000);
+      const respOk = res.status >= 200 && res.status < 300;
+      const teamPayload =
+        res.data?.team || res.data?.data || res.data?.createdTeam;
+      if (respOk && res.data.success !== false) {
+        // Try to extract the created team from various possible response shapes
+        const team = teamPayload || {};
+        const createdTeamName: string = team.name || formData.teamName;
+        const membersFromResponse: string[] = Array.isArray(team.members)
+          ? team.members.map((m: any) =>
+              typeof m === "string" ? m : m?.name || ""
+            )
+          : formData.members.map((m) => m.name).filter(Boolean);
 
-    } else {
-      setStatusMessage(res.data.message || "SUBMISSION FAILED");
+        // Persist and update app state
+        if (team.id) localStorage.setItem("teamId", team.id);
+        if (team.leaderId) localStorage.setItem("userId", team.leaderId);
+        if (team.code) localStorage.setItem("teamCode", team.code);
+        if (createdTeamName) localStorage.setItem("teamName", createdTeamName);
+        setTeamData({
+          teamName: createdTeamName,
+          members: membersFromResponse,
+        });
+
+        // Mark registration and navigate to levels (Let's Begin)
+        setRegistrationComplete(true);
+        setStatusMessage("TEAM CREATED ✅ Redirecting...");
+        setStatusColor("text-green-400");
+        setTimeout(() => {
+          onNavigate("home");
+        }, 500);
+      } else {
+        setStatusMessage(res.data.message || "SUBMISSION FAILED");
+        setStatusColor("text-red-400");
+      }
+    } catch (err) {
+      console.error("Submission failed:", err);
+      setStatusMessage("SUBMISSION FAILED");
       setStatusColor("text-red-400");
     }
-  } catch (err) {
-    console.error("Submission failed:", err);
-    setStatusMessage("SUBMISSION FAILED");
-    setStatusColor("text-red-400");
-  }
-};
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center relative z-10 p-4">
@@ -121,10 +156,14 @@ const RegistrationPage = ({ onNavigate, teamData, setTeamData, setRegistrationCo
           transition={{ duration: 0.8, delay: 0.4 }}
         >
           <div className="flex flex-col items-end space-y-2">
-            <Label className="text-primary font-space text-xs">NUMBER OF CREW MEMBERS</Label>
+            <Label className="text-primary font-space text-xs">
+              NUMBER OF CREW MEMBERS
+            </Label>
             <select
               value={numMembers}
-              onChange={(e) => handleMemberCountChange(parseInt(e.target.value))}
+              onChange={(e) =>
+                handleMemberCountChange(parseInt(e.target.value))
+              }
               className="bg-space-deep border border-primary/30 rounded-lg px-4 py-2 text-primary font-space text-sm focus:ring-2 focus:ring-primary/50 outline-none"
             >
               <option value={3}>3</option>
@@ -147,7 +186,9 @@ const RegistrationPage = ({ onNavigate, teamData, setTeamData, setRegistrationCo
               type="text"
               placeholder="TEAM NAME"
               value={formData.teamName}
-              onChange={(e) => setFormData({ ...formData, teamName: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, teamName: e.target.value })
+              }
               className="bg-space-deep border border-primary/30 text-primary font-space placeholder:text-primary/40 focus:ring-2 focus:ring-primary/50"
             />
           </div>
@@ -171,7 +212,7 @@ const RegistrationPage = ({ onNavigate, teamData, setTeamData, setRegistrationCo
           </Button>
           <Button
             className="space-button px-8 py-3 font-space tracking-wider"
-            onClick={() => onNavigate("home")}
+            onClick={() => onNavigate("teamChoice")}
           >
             BACK
           </Button>

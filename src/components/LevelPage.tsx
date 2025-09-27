@@ -33,14 +33,14 @@ const LevelPage = ({ onNavigate, teamData }: LevelPageProps) => {
       id: 2,
       name: "SCOTLAND YARD",
       description: "Hunt down Mr. X through space",
-      isUnlocked: false,
+      isUnlocked: true,
       isCompleted: false,
     },
     {
       id: 3,
       name: "FINAL MISSION",
       description: "The ultimate space challenge",
-      isUnlocked: false,
+      isUnlocked: true,
       isCompleted: false,
     },
   ]);
