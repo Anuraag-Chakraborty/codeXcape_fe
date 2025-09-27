@@ -64,7 +64,7 @@ interface TimerProps {
 }
 
 const Timer = ({ onTimerEnd }: TimerProps) => {
-  const [totalSeconds, setTotalSeconds] = useState(300); // 5 minutes
+  const [totalSeconds, setTotalSeconds] = useState(3); // 5 minutes
   const [message, setMessage] = useState('');
 
   useEffect(() => {

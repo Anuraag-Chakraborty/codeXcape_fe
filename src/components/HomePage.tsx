@@ -83,8 +83,8 @@ const HomePage = ({
   const [isButtonEnabled, setIsButtonEnabled] = useState(false);
 
   // Target countdown time: 10:30 PM on 27/09/2025
-  const targetTime = new Date("2025-09-27T22:30:00");
-
+  const targetTime = new Date("2025-09-27T20:04:00");
+  //10:40
   useEffect(() => {
     const timerId = setInterval(() => {
       const now = new Date();
