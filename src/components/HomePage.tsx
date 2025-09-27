@@ -2,7 +2,6 @@ import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import axios from "axios";
-import { P } from "node_modules/framer-motion/dist/types.d-DsEeKk6G";
 
 // Drizzle effect function
 const createDrizzleEffect = () => {
@@ -76,6 +75,40 @@ const HomePage = ({
     typeof window !== "undefined" ? localStorage.getItem("teamCode") : null
   );
 
+  // Timer state
+  const [timeLeft, setTimeLeft] = useState({
+    hours: 0,
+    minutes: 0,
+    seconds: 0,
+  });
+
+  // Button enabled state based on time
+  const [isButtonEnabled, setIsButtonEnabled] = useState(false);
+
+  // Target countdown time: 10:30 PM on 27/09/2025
+  const targetTime = new Date("2025-09-27T22:55:00");
+  //10:40
+  useEffect(() => {
+    const timerId = setInterval(() => {
+      const now = new Date();
+      const diff = targetTime.getTime() - now.getTime();
+
+      if (diff <= 0) {
+        setTimeLeft({ hours: 0, minutes: 0, seconds: 0 });
+        setIsButtonEnabled(true);
+        clearInterval(timerId);
+      } else {
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+        setTimeLeft({ hours, minutes, seconds });
+        setIsButtonEnabled(false);
+      }
+    }, 1000);
+
+    return () => clearInterval(timerId);
+  }, [targetTime]);
+
   useEffect(() => {
     const userId = localStorage.getItem("userId");
     const token = localStorage.getItem("authToken");
@@ -142,8 +175,7 @@ const HomePage = ({
     }
 
     const validMembers = editableMembers.filter(
-      (name) =>
-        name.trim() && !name.includes("PLAYER") && !name.includes("NAME")
+      (name) => name.trim() && !name.includes("PLAYER") && !name.includes("NAME")
     );
 
     if (validMembers.length === 0) {
@@ -156,6 +188,24 @@ const HomePage = ({
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center relative z-10">
+      {/* Timer at top-left corner */}
+      <div
+        className="fixed top-4 left-4 z-20 font-space rounded-md px-3 py-1 text-primary bg-black/70 border-2 border-white/50 backdrop-blur-sm shadow-lg shadow-primary/30"
+        style={{
+          fontSize: "1.25rem",
+          fontWeight: "600",
+          userSelect: "none",
+          minWidth: "130px",
+          textAlign: "center",
+          boxShadow:
+            "0 0 8px rgb(126 63 242 / 0.7), 0 0 12px rgb(176 132 255 / 0.5)",
+        }}
+      >
+        {`${timeLeft.hours.toString().padStart(2, "0")} : ${timeLeft.minutes
+          .toString()
+          .padStart(2, "0")} : ${timeLeft.seconds.toString().padStart(2, "0")}`}
+      </div>
+
       {/* Animated Title */}
       <motion.div
         className="relative mb-12"
@@ -348,13 +398,14 @@ const HomePage = ({
           ))}
         </div>
 
-        {/* Let's Begin Button - match Start/How To Play styling */}
+        {/* Let's Begin Button - enabled after countdown hits zero */}
         <Button
           className={`w-full px-8 py-4 text-lg font-space tracking-wider bg-black/70 border-2 border-white/50 rounded-xl text-primary hover:bg-primary hover:text-black hover:border-black transition-all duration-300 shadow-lg shadow-primary/30 backdrop-blur-sm ${
-            isRegistrationComplete ? "" : "opacity-50 cursor-not-allowed"
+            isButtonEnabled && isRegistrationComplete
+              ? ""
+              : "opacity-50 cursor-not-allowed"
           }`}
-          onClick={isRegistrationComplete ? handleLetsBegin : undefined}
-          //disabled={!isRegistrationComplete}
+          onClick={isButtonEnabled && isRegistrationComplete ? handleLetsBegin : undefined}
         >
           LET&apos;S BEGIN
         </Button>

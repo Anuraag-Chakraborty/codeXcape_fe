@@ -106,6 +106,7 @@ const App = () => {
         );
       case "levels":
         return <LevelPage onNavigate={handleNavigate} teamData={teamData} />;
+      
       case "jeopardy":
         return (
           <Jeopardy
