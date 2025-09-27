@@ -64,7 +64,7 @@ interface TimerProps {
 }
 
 const Timer = ({ onTimerEnd }: TimerProps) => {
-  const [totalSeconds, setTotalSeconds] = useState(3); // 5 minutes
+  const [totalSeconds, setTotalSeconds] = useState(300); // 5 minutes
   const [message, setMessage] = useState('');
 
   useEffect(() => {
@@ -186,7 +186,7 @@ const Timer = ({ onTimerEnd }: TimerProps) => {
 
         {/* Timer Title */}
         <motion.h1
-          className="text-3xl font-space font-bold text-transparent bg-gradient-to-r from-purple-600 via-blue-500 to-cyan-400 bg-clip-text text-center mb-8 tracking-wider neon-shadow"
+          className="text-3xl font-space font-bold  bg-gradient-to-r from-purple-600 via-blue-500 to-cyan-400 bg-clip-text text-center mb-8 tracking-wider neon-shadow"
           initial={{ opacity: 0, y: -30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.3 }}
@@ -208,7 +208,7 @@ const Timer = ({ onTimerEnd }: TimerProps) => {
             {/* Timer digits */}
             <div className="relative bg-space-deep/80 border-4 border-primary/40 rounded-full w-80 h-80 flex items-center justify-center backdrop-blur-md">
               <motion.div
-                className="font-space font-black text-6xl timer-glow text-transparent bg-gradient-cosmic bg-clip-text text-blue-400 neon-glow select-none"
+                className="font-space font-black text-6xl timer-glow  bg-gradient-cosmic bg-clip-text text-blue-400 neon-glow select-none"
                 animate={{ 
                   textShadow: totalSeconds <= 10 ? [
                     "0 0 10px hsl(var(--destructive)), 0 0 20px hsl(var(--destructive))",

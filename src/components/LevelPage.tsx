@@ -221,7 +221,7 @@ const LevelPage = ({ onNavigate, teamData }: LevelPageProps) => {
         animate={{ opacity: 1 }}
         transition={{ delay: 1.5 }}
       >
-        <div className="text-xs text-muted-foreground font-space mb-2">Demo Controls:</div>
+        {/* <div className="text-xs text-muted-foreground font-space mb-2">Demo Controls:</div>
         {levels.filter(l => l.isUnlocked && !l.isCompleted).map(level => (
           <Button
             key={level.id}
@@ -230,7 +230,8 @@ const LevelPage = ({ onNavigate, teamData }: LevelPageProps) => {
           >
             Complete Level {level.id}
           </Button>
-        ))}
+        ))} */}
+        
       </motion.div>
 
       {/* Floating objects and extra cosmic elements removed */}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom"; // Added for navigation
+// import { useNavigate } from "react-router-dom"; // Added for navigation
 import "./Jeopardy.css";
 
 const API_BASE = import.meta.env.VITE_BE_URL;
@@ -25,7 +25,7 @@ const difficultyMap = {
 };
 
 export default function Jeopardy({ onComplete }: { onComplete?: () => void }) {
-  const navigate = useNavigate(); // initialize navigate
+  // const navigate = useNavigate(); // initialize navigate
 
   const [score, setScore] = useState(0);
   const [answeredQuestions, setAnsweredQuestions] = useState([]); // categoryId-difficulty
@@ -44,7 +44,7 @@ export default function Jeopardy({ onComplete }: { onComplete?: () => void }) {
   });
 
   // Set your correct countdown target time here
-  const targetTime = new Date("2025-09-27T21:16:00");
+  const targetTime = new Date("2025-09-27T23:20:00");
 
   useEffect(() => {
     const timerId = setInterval(() => {
@@ -53,8 +53,9 @@ export default function Jeopardy({ onComplete }: { onComplete?: () => void }) {
 
       if (diff <= 0) {
         setTimeLeft({ hours: 0, minutes: 0, seconds: 0 });
-        clearInterval(timerId); 
-        navigate("levels"); 
+        clearInterval(timerId);
+
+        onComplete?.();
       } else {
         const hours = Math.floor(diff / (1000 * 60 * 60));
         const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
@@ -64,7 +65,7 @@ export default function Jeopardy({ onComplete }: { onComplete?: () => void }) {
     }, 1000);
 
     return () => clearInterval(timerId);
-  }, [targetTime, navigate]);
+  }, [targetTime, onComplete]);
 
   const fetchAttemptedQuestions = async () => {
     try {
