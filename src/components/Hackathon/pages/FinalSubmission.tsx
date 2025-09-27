@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/Hackathon/components/ui/button";
 import { CyberInput } from "@/components/Hackathon/components/ui/cyber-input";
 import { createDrizzleEffect } from "@/components/Hackathon/components/DrizzleEffect";
+import { getOrAssignProblem } from "../lib/problemStatements";
 import "../index.css";
 import axios from "axios";
 // Accept optional navigation from main App; fallback to window.history
@@ -27,6 +28,7 @@ const FinalSubmission = ({ onNavigate }: Props) => {
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [problem, setProblem] = useState<string | null>(null);
   const teamIdLS =
     typeof window !== "undefined"
       ? localStorage.getItem("teamId") || "default"
@@ -41,6 +43,7 @@ const FinalSubmission = ({ onNavigate }: Props) => {
     const t = localStorage.getItem("teamId") || "default";
     const key = `finalSubmitted:${t}`;
     setIsSubmitted(localStorage.getItem(key) === "true");
+    setProblem(getOrAssignProblem(t));
   }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -159,6 +162,11 @@ const FinalSubmission = ({ onNavigate }: Props) => {
         <p className="text-muted-foreground text-lg font-space">
           Submit your completed project deliverables
         </p>
+        {problem && (
+          <div className="mt-4 mx-auto max-w-3xl p-4 border border-primary/30 rounded-lg bg-black/30 text-primary text-sm font-space">
+            <span className="font-semibold">Assigned Problem:</span> {problem}
+          </div>
+        )}
       </motion.div>
 
       {/* Form */}

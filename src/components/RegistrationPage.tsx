@@ -106,7 +106,12 @@ const RegistrationPage = ({
         if (team.id) localStorage.setItem("teamId", team.id);
         if (team.leaderId) localStorage.setItem("userId", team.leaderId);
         // Try multiple possible keys for team code
-        const codeCandidate = team.code || team.teamCode || team.teamcode || res.data?.teamCode || res.data?.code;
+        const codeCandidate =
+          team.code ||
+          team.teamCode ||
+          team.teamcode ||
+          res.data?.teamCode ||
+          res.data?.code;
         if (codeCandidate) localStorage.setItem("teamCode", codeCandidate);
         if (createdTeamName) localStorage.setItem("teamName", createdTeamName);
         setTeamData({

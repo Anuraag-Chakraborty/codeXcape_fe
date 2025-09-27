@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
+import { getOrAssignProblem } from "../lib/problemStatements";
 import { Button } from "@/components/Hackathon/components/ui/button";
 import { CyberInput } from "@/components/Hackathon/components/ui/cyber-input";
 import { CyberTextarea } from "@/components/Hackathon/components/ui/cyber-textarea";
@@ -41,12 +42,14 @@ const InitialSubmission = ({ onNavigate }: Props) => {
     typeof window !== "undefined" &&
       localStorage.getItem(submittedKey) === "true"
   );
+  const [problem, setProblem] = useState<string | null>(null);
 
   useEffect(() => {
     // Re-evaluate on mount in case of team switch
     const t = localStorage.getItem("teamId") || "default";
     const key = `ideaSubmitted:${t}`;
     setIsSubmitted(localStorage.getItem(key) === "true");
+    setProblem(getOrAssignProblem(t));
   }, []);
 
   const handleInputChange = (
@@ -167,6 +170,11 @@ const InitialSubmission = ({ onNavigate }: Props) => {
         <p className="text-muted-foreground text-lg font-space">
           Submit your project concept and presentation
         </p>
+        {problem && (
+          <div className="mt-4 mx-auto max-w-3xl p-4 border border-primary/30 rounded-lg bg-black/30 text-primary text-sm font-space">
+            <span className="font-semibold">Assigned Problem:</span> {problem}
+          </div>
+        )}
       </motion.div>
 
       {/* Form */}
