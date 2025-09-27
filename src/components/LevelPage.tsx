@@ -38,14 +38,40 @@ const LevelPage = ({ onNavigate, teamData }: LevelPageProps) => {
     },
     {
       id: 3,
-      name: "FINAL MISSION",
-      description: "The ultimate space challenge",
+      name: "HACK PORTAL",
+      description: "Submit idea and final project",
       isUnlocked: false,
       isCompleted: false,
     },
   ]);
 
   const [burningLevel, setBurningLevel] = useState<number | null>(null);
+
+  // On mount, if level 1 was completed earlier, reflect it and unlock level 2 and 3
+  useEffect(() => {
+    const TEAM_ID = localStorage.getItem("teamId") || "default";
+    const completed =
+      localStorage.getItem(`level1Completed:${TEAM_ID}`) === "true";
+    if (completed) {
+      setLevels((prev) =>
+        prev.map((l) => {
+          if (l.id === 1) return { ...l, isCompleted: true };
+          if (l.id === 2) return { ...l, isUnlocked: true };
+          if (l.id === 3) return { ...l, isUnlocked: true };
+          return l;
+        })
+      );
+    }
+  }, []);
+
+  const lock = (levelId) => {
+    // lock the tapped level card until returning from that level
+    setLevels((levels) =>
+      levels.map((level) =>
+        level.id === levelId ? { ...level, isUnlocked: false } : level
+      )
+    );
+  };
 
   const handleLevelClick = (levelId: number) => {
     const level = levels.find(l => l.id === levelId);
@@ -56,7 +82,12 @@ const LevelPage = ({ onNavigate, teamData }: LevelPageProps) => {
     } else if (levelId === 2) {
       
       onNavigate("scotland-yard");
+      lock(levelId);
+    } else if (levelId === 3) {
+      onNavigate("hack-home");
+      lock(levelId);
     } else {
+      // future levels placeholder
       alert(`Level ${levelId} coming soon!`);
     }
   };
@@ -98,9 +129,17 @@ const LevelPage = ({ onNavigate, teamData }: LevelPageProps) => {
           boxShadow: '0 0 30px rgba(0, 255, 238, 0.3)'
         }}
       >
-        <h3 className="text-primary font-space font-bold text-lg mb-4 text-center border-b border-primary/30 pb-2">
+        <h3 className="text-primary font-space font-bold text-lg mb-2 text-center">
           {teamData.teamName || "SPACE CREW"}
         </h3>
+        {typeof window !== "undefined" && localStorage.getItem("teamCode") && (
+          <div className="text-xs text-secondary font-space mb-4 text-center border-b border-primary/30 pb-2">
+            Team Code:{" "}
+            <span className="font-semibold">
+              {localStorage.getItem("teamCode")}
+            </span>
+          </div>
+        )}
         <div className="space-y-2">
           {(teamData.members || []).filter(member => 
             member && member.trim() && !member.includes("PLAYER") && !member.includes("NAME")
@@ -129,10 +168,15 @@ const LevelPage = ({ onNavigate, teamData }: LevelPageProps) => {
                 burningLevel === level.id ? 'animate-burn-disintegrate' : ''
               }`}
               initial={{ opacity: 0, scale: 0.8, y: 50 }}
-              animate={{ 
-                opacity: burningLevel === level.id ? [1, 0.5, 0] : (level.isUnlocked ? 1 : 0.5), 
-                scale: burningLevel === level.id ? [1, 1.1, 0.8] : 1, 
-                y: 0 
+              animate={{
+                opacity:
+                  burningLevel === level.id
+                    ? [1, 0.5, 0]
+                    : level.isUnlocked
+                    ? 1
+                    : 0.5,
+                scale: burningLevel === level.id ? [1, 1.1, 0.8] : 1,
+                y: 0,
               }}
               transition={{ duration: 0.8, delay: index * 0.2 }}
               onClick={() => handleLevelClick(level.id)}
@@ -240,3 +284,7 @@ const LevelPage = ({ onNavigate, teamData }: LevelPageProps) => {
 };
 
 export default LevelPage;
+
+function useEffect(arg0: () => void, arg1: undefined[]) {
+  throw new Error("Function not implemented.");
+}

@@ -17,6 +17,9 @@ import LoginPage from "./components/LoginPage";
 import SignupPage from "./components/SignUp";
 import TeamChoicePage from "./components/TeamChoicePage";
 import JoinTeam from "./components/JoinTeam";
+import HackHome from "./components/Hackathon/pages/Home";
+import HackInitial from "./components/Hackathon/pages/InitialSubmission";
+import HackFinal from "./components/Hackathon/pages/FinalSubmission";
 
 const queryClient = new QueryClient();
 
@@ -119,6 +122,12 @@ const App = () => {
             onGameComplete={handleGameComplete}
           />
         );
+      case "hack-home":
+        return <HackHome onNavigate={handleNavigate} />;
+      case "hack-initial":
+        return <HackInitial onNavigate={handleNavigate} />;
+      case "hack-final":
+        return <HackFinal onNavigate={handleNavigate} />;
       case "login":
         return (
           <LoginPage

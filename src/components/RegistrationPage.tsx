@@ -91,7 +91,7 @@ const RegistrationPage = ({
       console.log("Response:", res.data);
       const respOk = res.status >= 200 && res.status < 300;
       const teamPayload =
-        res.data?.team || res.data?.data || res.data?.createdTeam;
+        res.data?.team || res.data?.data || res.data?.createdTeam || res.data;
       if (respOk && res.data.success !== false) {
         // Try to extract the created team from various possible response shapes
         const team = teamPayload || {};
@@ -105,7 +105,14 @@ const RegistrationPage = ({
         // Persist and update app state
         if (team.id) localStorage.setItem("teamId", team.id);
         if (team.leaderId) localStorage.setItem("userId", team.leaderId);
-        if (team.code) localStorage.setItem("teamCode", team.code);
+        // Try multiple possible keys for team code
+        const codeCandidate =
+          team.code ||
+          team.teamCode ||
+          team.teamcode ||
+          res.data?.teamCode ||
+          res.data?.code;
+        if (codeCandidate) localStorage.setItem("teamCode", codeCandidate);
         if (createdTeamName) localStorage.setItem("teamName", createdTeamName);
         setTeamData({
           teamName: createdTeamName,
