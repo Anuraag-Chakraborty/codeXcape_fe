@@ -131,7 +131,13 @@ const HomePage = ({
           teamName: team.teamname,
           members: users.map((user) => user.username),
         });
-        const codeCandidate = team.code || team.teamCode || team.teamcode || response.data?.teamCode || response.data?.code || localStorage.getItem("teamCode");
+        const codeCandidate =
+          team.code ||
+          team.teamCode ||
+          team.teamcode ||
+          response.data?.teamCode ||
+          response.data?.code ||
+          localStorage.getItem("teamCode");
         if (codeCandidate) {
           localStorage.setItem("teamCode", codeCandidate);
           setTeamCode(codeCandidate);
@@ -175,7 +181,8 @@ const HomePage = ({
     }
 
     const validMembers = editableMembers.filter(
-      (name) => name.trim() && !name.includes("PLAYER") && !name.includes("NAME")
+      (name) =>
+        name.trim() && !name.includes("PLAYER") && !name.includes("NAME")
     );
 
     if (validMembers.length === 0) {
@@ -405,7 +412,11 @@ const HomePage = ({
               ? ""
               : "opacity-50 cursor-not-allowed"
           }`}
-          onClick={isButtonEnabled && isRegistrationComplete ? handleLetsBegin : undefined}
+          onClick={
+            isButtonEnabled && isRegistrationComplete
+              ? handleLetsBegin
+              : undefined
+          }
         >
           LET&apos;S BEGIN
         </Button>
