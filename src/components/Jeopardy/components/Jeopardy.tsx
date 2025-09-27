@@ -44,7 +44,7 @@ export default function Jeopardy({ onComplete }: { onComplete?: () => void }) {
   });
 
   // Set your correct countdown target time here
-  const targetTime = new Date("2025-09-27T23:20:00");
+  const targetTime = new Date("2025-09-27T23:30:00");
 
   useEffect(() => {
     const timerId = setInterval(() => {
