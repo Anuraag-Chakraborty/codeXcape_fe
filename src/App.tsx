@@ -10,7 +10,7 @@ import HomePage from "./components/HomePage";
 import InstructionsPage from "./components/InstructionsPage";
 import RegistrationPage from "./components/RegistrationPage";
 import LevelPage from "./components/LevelPage";
-import JeopardyGame from "./components/JeopardyGame";
+import Jeopardy from "./components/Jeopardy/Jeopardy";
 import ScotlandYardGame from "./components/ScotlandYardGame";
 import ResultsScreen from "./components/ResultsScreen";
 import LoginPage from "./components/LoginPage";
@@ -104,10 +104,7 @@ const App = () => {
         return <LevelPage onNavigate={handleNavigate} teamData={teamData} />;
       case "jeopardy":
         return (
-          <JeopardyGame
-            onNavigate={handleNavigate}
-            onGameComplete={handleGameComplete}
-          />
+          <Jeopardy/>
         );
       case "scotland-yard":
         return (
