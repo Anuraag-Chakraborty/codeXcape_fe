@@ -72,6 +72,9 @@ const HomePage = ({
       ? teamData.members
       : ["PLAYER 1 NAME", "PLAYER 2 NAME", "PLAYER 3 NAME", "PLAYER 4 NAME"]
   );
+  const [teamCode, setTeamCode] = useState<string | null>(
+    typeof window !== "undefined" ? localStorage.getItem("teamCode") : null
+  );
 
   useEffect(() => {
     const userId = localStorage.getItem("userId");
@@ -95,6 +98,11 @@ const HomePage = ({
           teamName: team.teamname,
           members: users.map((user) => user.username),
         });
+        const codeCandidate = team.code || team.teamCode || team.teamcode || response.data?.teamCode || response.data?.code || localStorage.getItem("teamCode");
+        if (codeCandidate) {
+          localStorage.setItem("teamCode", codeCandidate);
+          setTeamCode(codeCandidate);
+        }
       }
     })();
   }, []);
@@ -227,6 +235,20 @@ const HomePage = ({
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.8, delay: 1.2 }}
       >
+        {teamCode && (
+          <div className="mb-4 flex items-center justify-center gap-3">
+            <span className="px-3 py-1 rounded-md border border-primary/40 text-primary font-space text-sm bg-black/40">
+              Team Code: <strong className="ml-1">{teamCode}</strong>
+            </span>
+            <button
+              className="text-xs font-space text-secondary underline hover:text-secondary-glow"
+              onClick={() => navigator.clipboard.writeText(teamCode)}
+              type="button"
+            >
+              Copy
+            </button>
+          </div>
+        )}
         {/* Team Name */}
         <div className="relative mb-6">
           <motion.div
