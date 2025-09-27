@@ -44,7 +44,9 @@ const LoginPage = ({ onNavigate, setLoginComplete }: LoginPageProps) => {
     console.log("Submitting login for:", formData.vitEmailId);
 
     try {
-      const API_URL = import.meta.env.VITE_BE_URL || "https://gravitas-backend-25.onrender.com";
+      const API_URL =
+        import.meta.env.VITE_BE_URL ||
+        "https://gravitas-backend-25.onrender.com";
       const response = await axios.post(`${API_URL}/auth/login`, {
         email: formData.vitEmailId,
         password: formData.password,
@@ -58,11 +60,23 @@ const LoginPage = ({ onNavigate, setLoginComplete }: LoginPageProps) => {
         setStatusColor("text-green-400");
         setLoginComplete(true);
 
-        console.log("Login success, navigate to home");
+        if (response.data.user.teamDetails.teamId) {
+          localStorage.setItem("teamId", response.data.user.teamDetails.teamId);
+          localStorage.setItem("userId", response.data.user.id);
+          console.log("Login success, navigate to home");
+          onNavigate("home");
+          return;
+        }
 
-        setTimeout(() => {
-          onNavigate("registration");
-        }, 1000);
+        if (!response.data.user.teamDetails.teamId) {
+          console.log("Login success, navigate to home");
+          onNavigate("teamChoice");
+          return;
+        }
+
+        // console.log("Login success team not created, navigate to registration");
+
+        onNavigate("teamChoice");
       } else if (response.data.error) {
         console.log("Backend error:", response.data.error);
         setStatusMessage(response.data.error);
@@ -154,7 +168,7 @@ const LoginPage = ({ onNavigate, setLoginComplete }: LoginPageProps) => {
         </motion.div>
 
         <div className="text-center mt-4 text-primary font-space text-sm">
-          Didn't register yet?{' '}
+          Didn't register yet?{" "}
           <button
             className="text-primary-glow underline cursor-pointer font-semibold"
             onClick={() => onNavigate("signup")}
